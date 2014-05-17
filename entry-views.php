@@ -98,7 +98,10 @@ final class Entry_Views_Plugin {
 	 * @return void
 	 */
 	function includes() {
-		require_once( trailingslashit( plugin_dir_path( __FILE__ ) ) . 'inc/template.php' );
+		$path = trailingslashit( plugin_dir_path( __FILE__ ) );
+
+		require_once( "{$path}inc/template.php"    );
+		require_once( "{$path}/inc/shortcodes.php" );
 	}
 
 	/**
