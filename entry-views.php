@@ -3,24 +3,17 @@
  * Plugin Name: Entry Views
  * Plugin URI:  http://themehybrid.com/plugins/entry-views
  * Description: A WordPress script for counting post views.
- * Version:     1.0.0
+ * Version:     1.0.0-alpha-1
  * Author:      Justin Tadlock
  * Author URI:  http://justintadlock.com
  * Text Domain: entry-views
  * Domain Path: /languages
- */
-
-/**
- * Entry Views - A WordPress script for counting post views.
  *
  * Entry views is a script for calculating the number of views a post gets.  It is meant to be basic and 
  * not a full-featured solution.  The idea is to allow theme/plugin authors to quickly load this file and 
  * build functions on top of it to suit their project needs.  This is an AJAX-based solution, so only visitors 
  * to your site with JavaScript enabled in their browser will update the view count.  It is possible to do this
  * without AJAX but not recommend (see notes below).
- *
- * By default, no post types are supported.  You have to register support for 'entry-views' for the post types
- * you wish to use this extension with.
  *
  * Not using AJAX: You can call up entry_views_update() at any time and pass it a post ID to update the 
  * count, but this has problems.  Any links with rel="next" or rel="prefetch" will cause some browsers to prefetch
@@ -36,168 +29,183 @@
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  *
- * @package EntryViews
- * @version 0.2.3
- * @author Justin Tadlock <justin@justintadlock.com>
- * @copyright Copyright (c) 2010 - 2012, Justin Tadlock
- * @link http://justintadlock.com
- * @license http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+ * @package   EntryViews
+ * @version   1.0.0
+ * @author    Justin Tadlock <justin@justintadlock.com>
+ * @copyright Copyright (c) 2010 - 2014, Justin Tadlock
+ * @link      http://themehybrid.com/plugins/entry-views
+ * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
-
-/* Add post type support for 'entry-views'. */
-add_action( 'init', 'entry_views_post_type_support' );
-
-/* Add the [entry-views] shortcode. */
-add_shortcode( 'entry-views', 'entry_views_get' );
-
-/* Registers the entry views extension scripts if we're on the correct page. */
-add_action( 'template_redirect', 'entry_views_load' );
-
-/* Add the entry views AJAX actions to the appropriate hooks. */
-add_action( 'wp_ajax_entry_views', 'entry_views_update_ajax' );
-add_action( 'wp_ajax_nopriv_entry_views', 'entry_views_update_ajax' );
 
 /**
- * Adds support for 'entry-views' to the 'post', 'page', and 'attachment' post types (default WordPress 
- * post types).  For all other post types, the theme should explicitly register support for this feature.
+ * Plugin loader class.
  *
- * @since 0.2.0
- * @access private
- * @return void
+ * @since 1.0.0
  */
-function entry_views_post_type_support() {
+final class Entry_Views_Plugin {
 
-	/* Add support for entry-views to the 'post' post type. */
-	add_post_type_support( 'post', array( 'entry-views' ) );
+	/**
+	 * Holds the instances of this class.
+	 *
+	 * @since  1.0.0
+	 * @access private
+	 * @var    object
+	 */
+	private static $instance;
 
-	/* Add support for entry-views to the 'page' post type. */
-	add_post_type_support( 'page', array( 'entry-views' ) );
+	/**
+	 * The post ID to update the entry views for.
+	 *
+	 * @since  1.0.0
+	 * @access public
+	 * @var    int
+	 */
+	public $post_id = 0;
 
-	/* Add support for entry-views to the 'attachment' post type. */
-	add_post_type_support( 'attachment', array( 'entry-views' ) );
-}
+	/**
+	 * Sets up needed actions/filters for the plugin to initialize.
+	 *
+	 * @since  1.0.0
+	 * @access public
+	 * @return void
+	 */
+	public function __construct() {
 
-/**
- * Checks if we're on a singular post view and if the current post type supports the 'entry-views'
- * extension.  If so, set the $post_id variable and load the needed JavaScript.
- *
- * @since 0.1.0
- * @access private
- * @return void
- */
-function entry_views_load() {
-	global $_entry_views_post_id;
+		add_action( 'plugins_loaded',             array( $this, 'i18n'              ), 2  );
+		add_action( 'plugins_loaded',             array( $this, 'includes'          ), 3  );
+		add_action( 'init',                       array( $this, 'post_type_support' ), 10 );
+		add_action( 'template_redirect',          array( $this, 'load'              ), 99 );
+		add_action( 'wp_ajax_entry_views',        array( $this, 'update_ajax'       ), 10 );
+		add_action( 'wp_ajax_nopriv_entry_views', array( $this, 'update_ajax'       ), 10 );
+	}
 
-	/* Check if we're on a singular post view. */
-	if ( is_singular() && !is_preview() ) {
+	/**
+	 * Loads the translation files.
+	 *
+	 * @since  1.0.0
+	 * @access public
+	 * @return void
+	 */
+	function i18n() {
+		load_plugin_textdomain( 'entry-views', false, 'entry-views/languages' );
+	}
 
-		/* Get the post object. */
-		$post = get_queried_object();
+	/**
+	 * Loads the initial files needed by the plugin.
+	 *
+	 * @since  1.0.0
+	 * @access public
+	 * @return void
+	 */
+	function includes() {
+		require_once( trailingslashit( plugin_dir_path( __FILE__ ) ) . 'inc/template.php' );
+	}
 
-		/* Check if the post type supports the 'entry-views' feature. */
-		if ( post_type_supports( $post->post_type, 'entry-views' ) ) {
+	/**
+	 * Adds support for 'entry-views' to the 'post', 'page', and 'attachment' post types (default WordPress 
+	 * post types).  For all other post types, the theme should explicitly register support for this feature.
+	 *
+	 * @since  1.0.0
+	 * @access public
+	 * @return void
+	 */
+	function post_type_support() {
 
-			/* Set the post ID for later use because we wouldn't want a custom query to change this. */
-			$_entry_views_post_id = get_queried_object_id();
+		/* Core post types. */
+		add_post_type_support( 'post',       array( 'entry-views' ) );
+		add_post_type_support( 'page',       array( 'entry-views' ) );
+		add_post_type_support( 'attachment', array( 'entry-views' ) );
 
-			/* Enqueue the jQuery library. */
-			wp_enqueue_script( 'jquery' );
+		/* Plugin post types. */
+		add_post_type_support( 'portfolio_item',  array( 'entry-views' ) );
+		add_post_type_support( 'recipe',          array( 'entry-views' ) );
+		add_post_type_support( 'restaurant_item', array( 'entry-views' ) );
+	}
 
-			/* Load the entry views JavaScript in the footer. */
-			add_action( 'wp_footer', 'entry_views_load_scripts' );
+	/**
+	 * Checks if we're on a singular post view and if the current post type supports the 'entry-views'
+	 * extension.  If so, set the $post_id variable and load the needed JavaScript.
+	 *
+	 * @since  1.0.0
+	 * @access public
+	 * @return void
+	 */
+	function load() {
+
+		/* Check if we're on a singular post view. */
+		if ( is_singular() && !is_preview() ) {
+
+			/* Get the post object. */
+			$post = get_queried_object();
+
+			/* Check if the post type supports the 'entry-views' feature. */
+			if ( post_type_supports( $post->post_type, 'entry-views' ) ) {
+
+				/* Set the post ID for later use because we wouldn't want a custom query to change this. */
+				$this->post_id = get_queried_object_id();
+
+				/* Enqueue the jQuery library. */
+				wp_enqueue_script( 'jquery' );
+
+				/* Load the entry views JavaScript in the footer. */
+				add_action( 'wp_footer', array( $this, 'load_scripts' ) );
+			}
 		}
 	}
-}
 
-/**
- * Updates the number of views when on a singular view of a post.  This function uses post meta to store
- * the number of views per post.  By default, the meta key is 'Views', but you can filter this with the 
- * 'entry_views_meta_key' hook.
- *
- * @since 0.1.0
- * @access public
- * @param int $post_id The ID of the post to update the meta for.
- * @return void
- */
-function entry_views_update( $post_id = '' ) {
+	/**
+	 * Callback function hooked to 'wp_ajax_entry_views' and 'wp_ajax_nopriv_entry_views'.  It checks the
+	 * AJAX nonce and passes the given $post_id to the entry views update function.
+	 *
+	 * @since  1.0.0
+	 * @access public
+	 * @return void
+	 */
+	function update_ajax() {
 
-	/* If we're on a singular view of a post, calculate the number of views. */
-	if ( !empty( $post_id ) ) {
+		/* Check the AJAX nonce to make sure this is a valid request. */
+		check_ajax_referer( 'entry_views_ajax' );
 
-		/* Allow devs to override the meta key used. By default, this is 'Views'. */
-		$meta_key = apply_filters( 'entry_views_meta_key', 'Views' );
+		/* If the post ID is set, set it to the $post_id variable and make sure it's an integer. */
+		if ( isset( $_POST['post_id'] ) )
+			$post_id = absint( $_POST['post_id'] );
 
-		/* Get the number of views the post currently has. */
-		$old_views = get_post_meta( $post_id, $meta_key, true );
+		/* If $post_id isn't empty, pass it to the entry_views_update() function to update the view count. */
+		if ( !empty( $post_id ) )
+			entry_views_update( $post_id );
+	}
 
-		/* Add +1 to the number of current views. */
-		$new_views = absint( $old_views ) + 1;
+	/**
+	 * Displays a small script that sends an AJAX request for the page.  It passes the $post_id to the AJAX 
+	 * callback function for updating the meta.
+	 *
+	 * @since  1.0.0
+	 * @access public
+	 * @return void
+	 */
+	function load_scripts() {
 
-		/* Update the view count with the new view count. */
-		update_post_meta( $post_id, $meta_key, $new_views, $old_views );
+		/* Create a nonce for the AJAX request. */
+		$nonce = wp_create_nonce( 'entry_views_ajax' );
+
+		/* Display the JavaScript needed. */
+		echo '<script type="text/javascript">/* <![CDATA[ */ jQuery(document).ready( function() { jQuery.post( "' . admin_url( 'admin-ajax.php' ) . '", { action : "entry_views", _ajax_nonce : "' . $nonce . '", post_id : ' . absint( $this->post_id ) . ' } ); } ); /* ]]> */</script>' . "\n";
+	}
+
+	/**
+	 * Returns the instance.
+	 *
+	 * @since  1.0.0
+	 * @access public
+	 * @return object
+	 */
+	public static function get_instance() {
+
+		if ( !self::$instance )
+			self::$instance = new self;
+
+		return self::$instance;
 	}
 }
 
-/**
- * Gets the number of views a specific post has.  It also doubles as a shortcode, which is called with the 
- * [entry-views] format.
- *
- * @since 0.1.0
- * @access public
- * @param array $attr Attributes for use in the shortcode.
- * @return string
- */
-function entry_views_get( $attr = '' ) {
-
-	/* Merge the defaults and the given attributes. */
-	$attr = shortcode_atts( array( 'before' => '', 'after' => '', 'post_id' => get_the_ID() ), $attr );
-
-	/* Allow devs to override the meta key used. */
-	$meta_key = apply_filters( 'entry_views_meta_key', 'Views' );
-
-	/* Get the number of views the post has. */
-	$views = intval( get_post_meta( $attr['post_id'], $meta_key, true ) );
-
-	/* Returns the formatted number of views. */
-	return $attr['before'] . number_format_i18n( $views ) . $attr['after'];
-}
-
-/**
- * Callback function hooked to 'wp_ajax_entry_views' and 'wp_ajax_nopriv_entry_views'.  It checks the
- * AJAX nonce and passes the given $post_id to the entry views update function.
- *
- * @since 0.1.0
- * @access private
- * @return void
- */
-function entry_views_update_ajax() {
-
-	/* Check the AJAX nonce to make sure this is a valid request. */
-	check_ajax_referer( 'entry_views_ajax' );
-
-	/* If the post ID is set, set it to the $post_id variable and make sure it's an integer. */
-	if ( isset( $_POST['post_id'] ) )
-		$post_id = absint( $_POST['post_id'] );
-
-	/* If $post_id isn't empty, pass it to the entry_views_update() function to update the view count. */
-	if ( !empty( $post_id ) )
-		entry_views_update( $post_id );
-}
-
-/**
- * Displays a small script that sends an AJAX request for the page.  It passes the $post_id to the AJAX 
- * callback function for updating the meta.
- *
- * @since 0.1.0
- * @access private
- * @return void
- */
-function entry_views_load_scripts() {
-	global $_entry_views_post_id;
-
-	/* Create a nonce for the AJAX request. */
-	$nonce = wp_create_nonce( 'entry_views_ajax' );
-
-	/* Display the JavaScript needed. */
-	echo '<script type="text/javascript">/* <![CDATA[ */ jQuery(document).ready( function() { jQuery.post( "' . admin_url( 'admin-ajax.php' ) . '", { action : "entry_views", _ajax_nonce : "' . $nonce . '", post_id : ' . $_entry_views_post_id . ' } ); } ); /* ]]> */</script>' . "\n";
-}
+Entry_Views_Plugin::get_instance();
