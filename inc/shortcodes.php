@@ -11,7 +11,7 @@
  */
 
 /* Register shortcodes. */
-add_action( 'init', 'entry_views_register_shortcodes' );
+add_action( 'init', 'ev_register_shortcodes' );
 
 /**
  * Registers shortcodes for the plugin.
@@ -20,9 +20,9 @@ add_action( 'init', 'entry_views_register_shortcodes' );
  * @access public
  * @return void
  */
-function entry_views_register_shortcodes() {
+function ev_register_shortcodes() {
 
-	add_shortcode( 'entry-views', 'entry_views_shortcode' );
+	add_shortcode( 'entry-views', 'ev_entry_views_shortcode' );
 }
 
 /**
@@ -33,7 +33,7 @@ function entry_views_register_shortcodes() {
  * @param  array  $attr  Attributes for use in the shortcode.
  * @return string
  */
-function entry_views_shortcode( $attr = '' ) {
+function ev_entry_views_shortcode( $attr = '' ) {
 
 	$defaults = array(
 		'before'  => '',
@@ -43,5 +43,5 @@ function entry_views_shortcode( $attr = '' ) {
 
 	$attr = shortcode_atts( $defaults, $attr, 'entry-views' );
 
-	return entry_views_get( $attr );
+	return ev_get_post_views( $attr );
 }

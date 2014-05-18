@@ -100,8 +100,9 @@ final class Entry_Views_Plugin {
 	function includes() {
 		$path = trailingslashit( plugin_dir_path( __FILE__ ) );
 
-		require_once( "{$path}inc/template.php"    );
-		require_once( "{$path}/inc/shortcodes.php" );
+		require_once( "{$path}inc/functions.php"  );
+		require_once( "{$path}inc/template.php"   );
+		require_once( "{$path}inc/shortcodes.php" );
 	}
 
 	/**
@@ -173,9 +174,9 @@ final class Entry_Views_Plugin {
 		if ( isset( $_POST['post_id'] ) )
 			$post_id = absint( $_POST['post_id'] );
 
-		/* If $post_id isn't empty, pass it to the entry_views_update() function to update the view count. */
+		/* If $post_id isn't empty, pass it to the ev_set_post_view_count() function to update the view count. */
 		if ( !empty( $post_id ) )
-			entry_views_update( $post_id );
+			ev_set_post_view_count( $post_id );
 	}
 
 	/**
