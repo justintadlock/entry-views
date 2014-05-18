@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Entry Views
  * Plugin URI:  http://themehybrid.com/plugins/entry-views
- * Description: A WordPress script for counting post views.
+ * Description: A WordPress plugin for tracking the number of post views.
  * Version:     1.0.0-alpha-1
  * Author:      Justin Tadlock
  * Author URI:  http://justintadlock.com
@@ -15,7 +15,7 @@
  * to your site with JavaScript enabled in their browser will update the view count.  It is possible to do this
  * without AJAX but not recommend (see notes below).
  *
- * Not using AJAX: You can call up entry_views_update() at any time and pass it a post ID to update the 
+ * Not using AJAX: You can call up ev_set_post_view_count() at any time and pass it a post ID to update the 
  * count, but this has problems.  Any links with rel="next" or rel="prefetch" will cause some browsers to prefetch
  * the data for that particular page.  This can cause the view count to be skewed.  To try and avoid this 
  * issue, you need to disable/remove adjacent_posts_rel_link_wp_head().  However, this is not bullet-proof 

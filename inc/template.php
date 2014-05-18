@@ -1,6 +1,6 @@
 <?php
 /**
- * Template functions for the plugin.
+ * Template functions for the plugin for use in WordPress themes.
  *
  * @package   EntryViews
  * @version   1.0.0
@@ -11,6 +11,9 @@
  */
 
 /**
+ * Outputs a specific post's view count.  This is a wrapper function for ev_get_post_views().  It simply 
+ * prints the output of that function to the screen.
+ *
  * @since  1.0.0
  * @access public
  * @param  array  $args
@@ -21,8 +24,8 @@ function ev_post_views( $args = array() ) {
 }
 
 /**
- *
- * To use the 'text' argument, either pass a nooped plural using _n_noop() or a single text string.
+ * Template tag for getting a specific post's view count.  It will default to the current post in The 
+ * Loop.  To use the 'text' argument, either pass a nooped plural using _n_noop() or a single text string.
  *
  * @since  1.0.0
  * @access public

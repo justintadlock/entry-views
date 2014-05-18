@@ -1,6 +1,6 @@
 <?php
 /**
- * Template functions for the plugin.
+ * Plugin functions.
  *
  * @package   EntryViews
  * @version   1.0.0
@@ -10,11 +10,23 @@
  * @license   http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
 
+/**
+ * Returns the meta key used throughout the plugin for getting/setting the post view count, which is 
+ * saved as post metadata.  Developers can also filter this via the `ev_meta_key` hook if they need 
+ * to alter it to match a meta key that was previously used by another plugin.
+ *
+ * @since  1.0.0
+ * @access public
+ * @return string
+ */
 function ev_get_meta_key() {
-	return apply_filters( 'wpv_meta_key', 'Views' );
+	return apply_filters( 'ev_meta_key', 'Views' );
 }
 
 /**
+ * Sets the post view count of specific post by adding +1 to the total count.  This function should only 
+ * be used if you want to add an addtional +1 to the count.
+ *
  * @since  1.0.0
  * @access public
  * @param  int    $post_id
@@ -33,6 +45,8 @@ function ev_set_post_view_count( $post_id ) {
 }
 
 /**
+ * Gets the view count of a specific post.
+ *
  * @since  1.0.0
  * @access public
  * @param  int    $post_id

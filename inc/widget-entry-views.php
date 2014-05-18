@@ -9,6 +9,8 @@
  */
 
 /**
+ * Entry Views widget.
+ *
  * @since 1.0.0
  */
 class EV_Widget_Entry_Views extends WP_Widget {
