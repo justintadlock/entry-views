@@ -74,6 +74,7 @@ final class Entry_Views_Plugin {
 		add_action( 'plugins_loaded',             array( $this, 'i18n'              ), 2  );
 		add_action( 'plugins_loaded',             array( $this, 'includes'          ), 3  );
 		add_action( 'init',                       array( $this, 'post_type_support' ), 10 );
+		add_action( 'widgets_init',               array( $this, 'register_widgets'  ), 10 );
 		add_action( 'template_redirect',          array( $this, 'load'              ), 99 );
 		add_action( 'wp_ajax_entry_views',        array( $this, 'update_ajax'       ), 10 );
 		add_action( 'wp_ajax_nopriv_entry_views', array( $this, 'update_ajax'       ), 10 );
@@ -100,9 +101,10 @@ final class Entry_Views_Plugin {
 	function includes() {
 		$path = trailingslashit( plugin_dir_path( __FILE__ ) );
 
-		require_once( "{$path}inc/functions.php"  );
-		require_once( "{$path}inc/template.php"   );
-		require_once( "{$path}inc/shortcodes.php" );
+		require_once( "{$path}inc/functions.php"          );
+		require_once( "{$path}inc/template.php"           );
+		require_once( "{$path}inc/shortcodes.php"         );
+		require_once( "{$path}inc/widget-entry-views.php" );
 	}
 
 	/**
@@ -124,6 +126,18 @@ final class Entry_Views_Plugin {
 		add_post_type_support( 'portfolio_item',  array( 'entry-views' ) );
 		add_post_type_support( 'recipe',          array( 'entry-views' ) );
 		add_post_type_support( 'restaurant_item', array( 'entry-views' ) );
+	}
+
+	/**
+	 * Registers the plugin's widgets.
+	 *
+	 * @since  1.0.0
+	 * @access public
+	 * @return void
+	 */
+	public function register_widgets() {
+
+		register_widget( 'EV_Widget_Entry_Views' );
 	}
 
 	/**
