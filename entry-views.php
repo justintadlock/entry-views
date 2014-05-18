@@ -123,6 +123,7 @@ final class Entry_Views_Plugin {
 		add_post_type_support( 'attachment', array( 'entry-views' ) );
 
 		/* Plugin post types. */
+		add_post_type_support( 'literature',      array( 'entry-views' ) );
 		add_post_type_support( 'portfolio_item',  array( 'entry-views' ) );
 		add_post_type_support( 'recipe',          array( 'entry-views' ) );
 		add_post_type_support( 'restaurant_item', array( 'entry-views' ) );
