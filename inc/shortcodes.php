@@ -38,6 +38,7 @@ function ev_entry_views_shortcode( $attr = '' ) {
 	$defaults = array(
 		'before'  => '',
 		'after'   => '',
+		'text'    => '',
 		'post_id' => get_the_ID()
 	);
 
