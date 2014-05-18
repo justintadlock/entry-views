@@ -3,7 +3,7 @@
  * Plugin Name: Entry Views
  * Plugin URI:  http://themehybrid.com/plugins/entry-views
  * Description: A WordPress plugin for tracking the number of post views.
- * Version:     1.0.0-alpha-1
+ * Version:     1.0.0-beta-1
  * Author:      Justin Tadlock
  * Author URI:  http://justintadlock.com
  * Text Domain: entry-views
