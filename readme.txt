@@ -90,22 +90,8 @@ Unfortunately, I cannot provide free support for this plugin to everyone.  I hon
 
 == Screenshots ==
 
-1. Entry Views widget options.
-2. Widget output on front end (Stargazer theme)
-
 == Changelog ==
 
-### Version 1.0.0
+### Version 1.0.0 ###
 
 * Everything is new!
-
-
-
-
-
-
-
-
-
-
-
