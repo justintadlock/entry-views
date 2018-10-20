@@ -46,7 +46,7 @@ class EV_Widget_Entry_Views extends WP_Widget {
 		);
 
 		/* Create the widget. */
-		$this->WP_Widget(
+		parent::__construct(
 			'ev-entry-views',
 			__( 'Entry Views', 'entry-views' ),
 			$widget_options,
